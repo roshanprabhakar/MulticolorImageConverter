@@ -1,4 +1,5 @@
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -9,6 +10,7 @@ public class ClusterFinder {
 
     BufferedImage image;
     ArrayList<Cluster> clusters;
+    ArrayList<ColorPoint> points;
 
     //DESCRIPTION:
     //red is the 1D
@@ -23,36 +25,81 @@ public class ClusterFinder {
             e.printStackTrace();
         }
 
-        CUBE = new ColorPoint[255][255][255];
+        CUBE = new ColorPoint[256][256][256];
+        points = new ArrayList<>();
         clusters = new ArrayList<>();
 
         for (int row = 0; row < image.getHeight(); row++) {
             for (int col = 0; col < image.getWidth(); col++) {
                 Color color = new Color(image.getRGB(col, row));
                 CUBE[color.getRed()][color.getGreen()][color.getBlue()] =
-                        new ColorPoint(color.getRed(), color.getBlue(), color.getGreen());
+                        new ColorPoint(color.getRed(), color.getGreen(), color.getBlue(), col, row);
+                points.add(CUBE[color.getRed()][color.getGreen()][color.getBlue()]);
             }
         }
     }
 
-    public void assignPointsToClusters() {
-        for (int r = 0; r < image.getHeight(); r++) {
-            for (int c = 0; c < image.getWidth(); c++) {
-                Color color = new Color(image.getRGB(c, r));
-                ColorPoint p = new ColorPoint(color.getRed(), color.getGreen(), color.getBlue());
-                findClosestClusterTo(p).add(p);
-            }
+    private void assignPointsToClusters() {
+        for (ColorPoint p : points) {
+            findClosestClusterTo(p).add(p);
         }
     }
 
     private Cluster findClosestClusterTo(ColorPoint p) {
-        Cluster closestCluster = new Cluster();
-        closestCluster.setCenter(new ColorPoint(255 / 2, 255 / 2, 255 / 2));
+        double minDistance = 362;
+        Cluster closestCluster = clusters.get(0);
         for (Cluster c : clusters) {
-            if (p.distanceTo(c) < p.distanceTo(closestCluster)) {
+            if (p.distanceTo(c) < minDistance) {
                 closestCluster = c;
+                minDistance = p.distanceTo(c);
             }
         }
         return closestCluster;
     }
+
+    private void recalculateCenters() {
+        for (Cluster c : clusters) c.recalculateCenter();
+    }
+
+    private void clearClusters() {
+        for (Cluster c : clusters) c.clear();
+    }
+
+    public void colorizeImage(int clusterNum) {
+        for (int i = 0; i < clusterNum; i++) {
+            clusters.add(new Cluster(new ColorPoint((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255), 0, 0)));
+        }
+        for (int rep = 0; rep < 100; rep++) {
+            clearClusters();
+            assignPointsToClusters();
+            recalculateCenters();
+        }
+        updateImage();
+    }
+
+    private void updateImage() {
+        for (Cluster cluster : clusters) {
+            for (ColorPoint p : cluster.getPoints()) {
+                image.setRGB(p.getX(), p.getY(), new Color(cluster.getCenter().getR(), cluster.getCenter().getG(), cluster.getCenter().getB()).getRGB());
+            }
+        }
+    }
+
+    public void displayImage() {
+        JFrame frame = new JFrame();
+        frame.getContentPane().setLayout(new FlowLayout());
+        frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+        frame.pack();
+        frame.setVisible(true);
+    }
 }
+
+
+
+
+
+
+
+
+
+

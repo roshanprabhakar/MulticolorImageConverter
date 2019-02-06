@@ -1,46 +1,76 @@
+import java.awt.*;
+
 public class ColorPoint {
+
+    private Cluster cluster;
+
+    private int r;
+    private int g;
+    private int b;
+
     private int x;
     private int y;
-    private int z;
 
-    public int getX() {
-        return x;
+    public Cluster getCluster() {
+        return this.cluster;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    public int getX() {
+        return this.x;
     }
 
     public int getY() {
-        return y;
+        return this.y;
     }
 
-    public void setY(int y) {
-        this.y = y;
+    public void setCluster(Cluster c) {
+        cluster = c;
     }
 
-    public int getZ() {
-        return z;
+    public int getR() {
+        return r;
     }
 
-    public void setZ(int z) {
-        this.z = z;
+    public void setR(int r) {
+        this.r = r;
     }
 
-    public ColorPoint(int x, int y, int z) {
+    public int getG() {
+        return g;
+    }
+
+    public void setG(int g) {
+        this.g = g;
+    }
+
+    public int getB() {
+        return b;
+    }
+
+    public void setB(int b) {
+        this.b = b;
+    }
+
+    public ColorPoint(int r, int g, int b, int x, int y) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
         this.x = x;
         this.y = y;
-        this.z = z;
     }
 
     public double distanceTo(ColorPoint other) {
-        double xs = (other.getX() - this.x) * (other.getX() - this.x);
-        double ys = (other.getY() - this.y) * (other.getY() - this.y);
-        double zs = (other.getZ() - this.z) * (other.getZ() - this.z);
+        double xs = (other.getR() - this.r) * (other.getR() - this.r);
+        double ys = (other.getG() - this.g) * (other.getG() - this.g);
+        double zs = (other.getB() - this.b) * (other.getB() - this.b);
         return Math.sqrt(xs + ys + zs);
     }
 
     public double distanceTo(Cluster other) {
         return distanceTo(other.getCenter());
+    }
+
+    public Color getColor() {
+        return new Color(r, g, b);
     }
 }
